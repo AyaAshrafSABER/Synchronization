@@ -47,6 +47,9 @@ void *batOperation(void* arg){
         bat_cross(*batObj);
         bat_leave(*batObj);
     }
+    pthread_exit(NULL);
+
+
 }
 int main() {
     intialize(); // intialize all condition varialbe, all mutex lock and counters

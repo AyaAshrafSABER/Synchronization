@@ -40,6 +40,17 @@ int bat_arrive(bat b){
     }
     printf("BAT %d from %c arrives at crossing\n", b.index, b.direction);
     crossingCounter++;
+    printf(" northCounter = %d;\n"
+           "    southCounter = %d;\n"
+           "    eastCounter = %d;\n"
+           "    westCounter = %d;\n"
+           "    crossingCounter = %d ;\n"
+           "    waitEast = %d;\n"
+           "    waitNorth = %d;\n"
+           "    waitSouth = %d;\n"
+           "    waitWest = %d;\n",  northCounter, southCounter,eastCounter ,
+           westCounter,crossingCounter, waitEast, waitNorth , waitSouth , waitWest );
+    printf("-----before checking---\n");
     check();
     pthread_mutex_unlock (&mutexMonitor);
     return can;
@@ -49,15 +60,36 @@ void bat_cross(bat b){
     pthread_mutex_lock (&mutexMonitor);
     char right = getRight(b.direction);
     waitRight(right);
-    printf("%c\n",b.direction);
+    printf("**********Enter the cross and try to wait on the right********");
+    printf(" northCounter = %d;\n"
+           "    southCounter = %d;\n"
+           "    eastCounter = %d;\n"
+           "    westCounter = %d;\n"
+           "    crossingCounter = %d ;\n"
+           "    waitEast = %d;\n"
+           "    waitNorth = %d;\n"
+           "    waitSouth = %d;\n"
+           "    waitWest = %d;\n",  northCounter, southCounter,eastCounter ,
+           westCounter,crossingCounter, waitEast, waitNorth , waitSouth , waitWest );
     pthread_mutex_unlock (&mutexMonitor);
     printf("bat %d wait to cross from %c crossing\n",b.index ,b.direction);
     sleep(1); // it takes one second for a BAT to cross
     pthread_mutex_lock (&mutexMonitor);
     printf("BAT %d from %c crossing\n", b.index, b.direction);
     char left = getLeft(b.direction);
-    signalLeft(left);
     crossingCounter--;
+    printf("**********After Crossing **********\n");
+    printf(" northCounter = %d;\n"
+           "    southCounter = %d;\n"
+           "    eastCounter = %d;\n"
+           "    westCounter = %d;\n"
+           "    crossingCounter = %d ;\n"
+           "    waitEast = %d;\n"
+           "    waitNorth = %d;\n"
+           "    waitSouth = %d;\n"
+           "    waitWest = %d;\n",  northCounter, southCounter,eastCounter ,
+           westCounter,crossingCounter, waitEast, waitNorth , waitSouth , waitWest );
+    signalLeft(left);
     pthread_mutex_unlock (&mutexMonitor);
 }
 void bat_leave(bat b){
@@ -122,6 +154,17 @@ void check(){
             pthread_cond_signal(&NorthFirst);
         }
         crossingCounter--;
+        printf("---------Solving the DeadLock -----------------\n");
+        printf(" northCounter = %d;\n"
+               "    southCounter = %d;\n"
+               "    eastCounter = %d;\n"
+               "    westCounter = %d;\n"
+               "    crossingCounter = %d ;\n"
+               "    waitEast = %d;\n"
+               "    waitNorth = %d;\n"
+               "    waitSouth = %d;\n"
+               "    waitWest = %d;\n",  northCounter, southCounter,eastCounter ,
+               westCounter,crossingCounter, waitEast, waitNorth , waitSouth , waitWest );
     }
 }
 
@@ -161,7 +204,6 @@ void waitRight(char right){
         case WEST: // code to be executed if direction[n]= w;
             if (westCounter >= 1) {
                 waitNorth++;
-                printf("%d\n",waitNorth);
                 pthread_cond_wait(&NorthFirst,&mutexMonitor);
             }
             break;
@@ -208,11 +250,9 @@ void signalLeft(char left){
             }
             break;
         case NORTH: // code to be executed if direction[n]= n;
-            printf("signal left %d northwait %d\n ", northCounter,waitNorth);
             if (northCounter >= 1) {
                 if (waitNorth > 0) {
                     waitNorth--;
-                    printf("signal");
                     pthread_cond_signal(&NorthFirst);
                 }
             }
@@ -228,4 +268,15 @@ void signalLeft(char left){
         default: // code to be executed if n doesn't match any cases
             break;
     }
+    printf("-*-*-*-*-*-*Try to signal left--*-*-*-*-*-\n");
+    printf(" northCounter = %d;\n"
+           "    southCounter = %d;\n"
+           "    eastCounter = %d;\n"
+           "    westCounter = %d;\n"
+           "    crossingCounter = %d ;\n"
+           "    waitEast = %d;\n"
+           "    waitNorth = %d;\n"
+           "    waitSouth = %d;\n"
+           "    waitWest = %d;\n",  northCounter, southCounter,eastCounter ,
+           westCounter,crossingCounter, waitEast, waitNorth , waitSouth , waitWest );
 }
