@@ -1,0 +1,1 @@
+/usr/bin/cc -g   CMakeFiles/Synchronization.dir/main.c.o CMakeFiles/Synchronization.dir/BatManager.c.o  -o Synchronization 
