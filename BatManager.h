@@ -21,16 +21,16 @@ int northCounter; //^
 int westCounter; //<
 int eastCounter; //>
 int southCounter; // V
-int waitNorth;
-int waitSouth;
-int waitEast;
-int waitWest;
+int waitNorth; // count the waiting bat from North on the right
+int waitSouth;// count the waiting bat from south on the right
+int waitEast;// count the waiting bat from East on the right
+int waitWest;// count the waiting bat from West on the right
 //condtionVariables
 pthread_cond_t  NorthQueue, EastQueue, SouthQueue, WestQueue, NorthFirst, EastFirst, SouthFirst, WestFirst;
 typedef struct {
-    int index;
+    int index; //order for the input
     char direction;
-} bat;
+} bat; //bat structure
 int bat_arrive(bat b);
 void bat_cross(bat b);
 void bat_leave(bat b);

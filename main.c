@@ -42,17 +42,17 @@ void *batOperation(void* arg){
     bat * batObj = (bat *) malloc(sizeof(bat));
     batObj->direction = directions[i];
     batObj->index = i;
-    int canArr = bat_arrive(*batObj);
+    int canArr = bat_arrive(*batObj); // check that the given direction is acceptable
     if (canArr) {
         bat_cross(*batObj);
         bat_leave(*batObj);
     }
 }
 int main() {
-    intialize();
-    scanf( "%s" , &directions[0]);
+    intialize(); // intialize all condition varialbe, all mutex lock and counters
+    scanf( "%s" , &directions[0]); // take direction from the user
     int len = strlen(directions);
-    pthread_t bat[len];
+    pthread_t bat[len]; //array of threads every thread is response of different bat
     pthread_attr_t attr [len];
     crossingCounter = 0;
     for(int i = 0; i < len; i++) {
@@ -63,13 +63,13 @@ int main() {
             exit(EXIT_FAILURE);
         }
         *arg = i;
-        pthread_create(&bat[i], &attr[i], batOperation, arg);
+        pthread_create(&bat[i], &attr[i], batOperation, arg); //create new thread
         pthread_attr_destroy(&attr[i]);
     }
     for(int i=0; i<len; i++)
     {
         pthread_join(bat[i], &status);
     }
-    destroy();
+    destroy(); //destroy all condition variable that is no longer be used
     pthread_exit(NULL);
 }

@@ -49,6 +49,7 @@ void bat_cross(bat b){
     pthread_mutex_lock (&mutexMonitor);
     char right = getRight(b.direction);
     waitRight(right);
+    printf("%c\n",b.direction);
     pthread_mutex_unlock (&mutexMonitor);
     printf("bat %d wait to cross from %c crossing\n",b.index ,b.direction);
     sleep(1); // it takes one second for a BAT to cross
@@ -65,15 +66,19 @@ void bat_leave(bat b){
     {
         case WEST: // code to be executed if direction[n]= w;
             westCounter--;
-            pthread_cond_signal(&WestQueue);
+            if (westCounter > 0) {
+                pthread_cond_signal(&WestQueue);
+            }
             if (waitNorth >= 1) {
-                pthread_cond_signal(&NorthFirst);
                 waitNorth --;
+                pthread_cond_signal(&NorthFirst);
             }
             break;
         case EAST: // code to be executed if direction[n]= e;
             eastCounter--;
-            pthread_cond_signal(&EastQueue);
+            if (eastCounter > 0) {
+                pthread_cond_signal(&EastQueue);
+            }
             if (waitSouth >= 1) {
                 pthread_cond_signal(&SouthFirst);
                 waitSouth--;
@@ -81,7 +86,9 @@ void bat_leave(bat b){
             break;
         case NORTH: // code to be executed if direction[n]= n;
             northCounter--;
-            pthread_cond_signal(&NorthQueue);
+            if (northCounter > 0) {
+                pthread_cond_signal(&NorthQueue);
+            }
             if (waitEast >= 1) {
                 pthread_cond_signal(&EastFirst);
                 waitEast--;
@@ -89,7 +96,9 @@ void bat_leave(bat b){
             break;
         case SOUTH:// code to be executed if direction[n]= s;
             southCounter--;
-            pthread_cond_signal(&SouthQueue);
+            if (southCounter > 0) {
+                pthread_cond_signal(&SouthQueue);
+            }
             if (waitWest >= 1){
                 pthread_cond_signal(&WestFirst);
                 waitWest--;
@@ -108,8 +117,10 @@ void check(){
 // the manager checks for deadlock and resolves it
     if (crossingCounter == 4) {
         printf("DEADLOCK: BAT jam detected, signalling North to go\n");
-        pthread_cond_signal(&NorthQueue);
-        northCounter--;
+        if (northCounter > 1 && waitNorth > 1) {
+            waitNorth--;
+            pthread_cond_signal(&NorthFirst);
+        }
         crossingCounter--;
     }
 }
@@ -150,6 +161,7 @@ void waitRight(char right){
         case WEST: // code to be executed if direction[n]= w;
             if (westCounter >= 1) {
                 waitNorth++;
+                printf("%d\n",waitNorth);
                 pthread_cond_wait(&NorthFirst,&mutexMonitor);
             }
             break;
@@ -181,26 +193,36 @@ void signalLeft(char left){
     {
         case WEST: // code to be executed if direction[n]= w;
             if (westCounter >= 1) {
-                waitWest--;
-                pthread_cond_signal(&WestFirst);
+                if (waitWest > 0) {
+                    waitWest--;
+                    pthread_cond_signal(&WestFirst);
+                }
             }
             break;
         case EAST: // code to be executed if direction[n]= e;
             if (eastCounter >= 1) {
-                waitEast--;
-                pthread_cond_signal(&EastFirst);
+                if(waitEast > 0) {
+                    waitEast--;
+                    pthread_cond_signal(&EastFirst);
+                }
             }
             break;
         case NORTH: // code to be executed if direction[n]= n;
+            printf("signal left %d northwait %d\n ", northCounter,waitNorth);
             if (northCounter >= 1) {
-                waitNorth--;
-                pthread_cond_signal(&NorthFirst);
+                if (waitNorth > 0) {
+                    waitNorth--;
+                    printf("signal");
+                    pthread_cond_signal(&NorthFirst);
+                }
             }
             break;
         case SOUTH:// code to be executed if direction[n]= s;
             if (southCounter >= 1) {
-                waitSouth--;
-                pthread_cond_signal(&SouthFirst);
+                if(waitSouth > 0) {
+                    waitSouth--;
+                    pthread_cond_signal(&SouthFirst);
+                }
             }
             break;
         default: // code to be executed if n doesn't match any cases
